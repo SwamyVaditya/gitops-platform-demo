@@ -1,0 +1,35 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: mgmt-cluster
+servers: 1
+agents: 1
+
+# Expose Kubernetes API on localhost:6443
+kubeAPI:
+  hostPort: "6443"
+
+# Map HTTP and HTTPS for Ingress (Argo CD, sample apps, etc.)
+ports:
+  - port: 80:80    # HTTP
+    nodeFilters:
+      - loadbalancer
+  - port: 443:443  # HTTPS
+    nodeFilters:
+      - loadbalancer
+
+# Optional: make localhost aliases for ingress domains like argo.localdev.me
+options:
+  k3s:
+    extraArgs:
+      - arg: "--disable=traefik"
+        nodeFilters:
+          - server:*
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
+#  k3d:
+#    wait: true
+#    disableLoadbalancer: false
+#    timeout: "10m0s"
+#    verbose: true

@@ -1,3 +1,8 @@
+# custom .gitignore for sample-app
+sample-app/node_modules/
+sample-app/dist/certs/
+certs/
+
 # Logs
 logs
 *.log

@@ -1,0 +1,16 @@
+# k8s/monitoring/alertmanager-certificate.yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: alertmanager-tls
+  namespace: monitoring
+spec:
+  secretName: alertmanager-tls
+  duration: 2160h   # 90 days
+  renewBefore: 360h # 15 days
+  commonName: alertmanager.myapp.localdev.me
+  dnsNames:
+    - alertmanager.myapp.localdev.me
+  issuerRef:
+    name: selfsigned-clusterissuer
+    kind: ClusterIssuer

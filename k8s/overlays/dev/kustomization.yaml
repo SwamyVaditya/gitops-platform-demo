@@ -1,0 +1,41 @@
+# k8s/overlays/dev/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namePrefix: dev-
+namespace: dev
+resources:
+  - ../../base/
+  - dev-cert.yaml
+patches:
+  - path: patch-deployment.yaml
+    target:
+      kind: Deployment
+      name: sample-app
+  # Strategic merge patch to ensure local ingress.yaml overrides base
+  - path: patch-ingress.yaml
+    target:
+      kind: Ingress
+      name: sample-app-ingress
+  - path: patch-service-monitor.yaml
+    target:
+      kind: ServiceMonitor
+      name: sample-app
+images:
+  - name: ghcr.io/swamyvaditya/sample-gitops-repo/sample-app
+    newTag: "e0d169d"
+transformers:
+  - env-label-transformer.yaml
+# Dev overlay kustomization.yaml
+# - Adds 'dev-' prefix to resource names
+# - Sets namespace to 'dev'
+# - Applies patches to Deployment and Ingress
+# - Updates container image tag for development version
+# - Uses environment label transformer for additional labeling
+# Reference base kustomization.yaml for common configurations
+# located at ../../base/kustomization.yaml
+# This overlay is tailored for the development environment
+# ensuring proper resource naming, namespace assignment,
+# and image versioning specific to dev deployments.
+# Prefix ensures resource names don’t collide across environments.
+# Namespace isolates dev resources within the cluster.
+# Patches customize base resources for dev-specific settings.

@@ -1,0 +1,32 @@
+# k8s/base/service-monitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sample-app
+  labels:
+    # --- CRITICAL FIX 3: Ensure this label matches the Prometheus selector (Fix 2) ---
+    release: kube-prometheus-stack 
+    # The Kustomize base labels below are good for identifying the resource, 
+    # but the 'release' label is what connects it to the Prometheus instance.
+    app.kubernetes.io/name: sample-app
+    app.kubernetes.io/part-of: myapp
+    
+spec:
+  # The selector targets the Service (which Kustomize creates in the 'dev' namespace)
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sample-app # This selects the Service in the 'dev' namespace
+  # The namespaceSelector is crucial for Prometheus to find this object
+  namespaceSelector:
+    matchNames: [] # Empty means 'all namespaces'
+  
+  # If you want to restrict to specific namespaces, uncomment and set them:
+  #  matchNames:
+  #    - dev
+  #    - staging
+  #    - prod
+  
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 15s

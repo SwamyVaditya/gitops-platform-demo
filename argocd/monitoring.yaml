@@ -1,0 +1,31 @@
+# argocd/monitoring.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring
+  namespace: argocd
+  annotations:
+    # This application runs *after* the CRDs are installed (manually or via a dedicated app)
+    argocd.argoproj.io/sync-wave: "0"
+    # Ensure this application does not attempt to create the CRDs itself
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  project: default
+  source:
+    # 💥 CRITICAL: This points to your Git repository where the Kustomize file lives
+    repoURL: https://github.com/swamyvaditya/sample-gitops-repo.git
+    targetRevision: HEAD # Use the latest commit from your branch
+    path: k8s/monitoring # Path to the kustomization.yaml file
+      
+  destination:
+    server: https://host.docker.internal:6444
+    namespace: monitoring # The target namespace for the monitoring components
+    
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true # Create the 'monitoring' namespace if it doesn't exist
+      # Set a generous timeout since this is a large deployment
+      - Timeout=900s
